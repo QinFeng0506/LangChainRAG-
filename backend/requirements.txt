@@ -1,0 +1,46 @@
+# Core
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+python-multipart==0.0.19
+
+# LangChain
+langchain==0.3.15
+langchain-community==0.3.15
+langgraph==0.2.63
+langchain-text-splitters==0.3.5
+
+# Database
+sqlalchemy[asyncio]==2.0.36
+aiosqlite==0.20.0
+
+# Vector DB
+chromadb==0.5.23
+
+# Cache
+diskcache==5.6.3
+
+# Auth
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+bcrypt==4.0.1
+
+# Config
+pydantic-settings==2.7.1
+
+# OpenAI compatible client (DashScope)
+openai==1.58.1
+
+# DashScope SDK
+dashscope==1.20.11
+
+# Document parsing
+pypdf==5.1.0
+docx2txt==0.8
+markdown==3.7
+unstructured==0.16.14
+openpyxl==3.1.5
+
+# Utils
+httpx==0.28.1
+aiofiles==24.1.0
+python-dotenv==1.0.1

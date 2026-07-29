@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(venv/Scripts/python -c ' *)",
+      "Bash(python -c ' *)",
+      "Bash(ls -la \"D:\\\\黑马记账APP\" 2>/dev/null || echo \"Directory not found at exact path\")",
+      "Read(//d/黑马记账APP/**)",
+      "Bash(venv/Scripts/python -m pytest tests/test_knowledge.py -v --tb=short -q)",
+      "Bash(rm -f \"d:\\\\LangChainRAG项目\\\\.claude\\\\test-result.json\" \"d:\\\\LangChainRAG项目\\\\.claude\\\\quality-result.json\")",
+      "Bash(git add *)",
+      "Bash(git commit *)"
+    ],
+    "additionalDirectories": [
+      "d:\\LangChainRAG项目\\.claude"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/pre-commit-check.js",
+            "timeout": 5000
+          }
+        ]
+      }
+    ]
+  }
+}

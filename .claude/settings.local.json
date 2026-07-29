@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx vite *)",
+      "Bash(curl -s http://localhost:8000/api/health)",
+      "Bash(venv/Scripts/python -c ' *)",
+      "Bash(curl -sv -X POST http://localhost:8000/api/auth/login -H \"Content-Type: application/json\" -d '{\"username\":\"admin\",\"password\":\"12345678\"}')"
+    ]
+  }
+}
