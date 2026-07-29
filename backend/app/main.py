@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 import os
+import secrets
 
 from app.config import get_settings
 from app.database import init_db
@@ -14,7 +15,19 @@ settings = get_settings()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """应用生命周期：启动时初始化数据库和管理员账号，关闭时清理资源。"""
-    # === 启动 ===
+    # === 启动前校验 ===
+    # JWT 密钥：未配置时随机生成（仅内存，重启会变）
+    if not settings.JWT_SECRET_KEY:
+        settings.JWT_SECRET_KEY = secrets.token_urlsafe(32)
+        print("[启动] ⚠️ 未配置 JWT_SECRET_KEY，已随机生成（重启后会变化）。请通过 .env 设置固定密钥。")
+
+    # 管理员密码：未配置时随机生成
+    admin_pwd = settings.ADMIN_PASSWORD
+    if not admin_pwd:
+        admin_pwd = secrets.token_urlsafe(10)
+        print(f"[启动] ⚠️ 未配置 ADMIN_PASSWORD，已随机生成。")
+
+    # === 创建目录 ===
     os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
     os.makedirs(settings.CACHE_DIR, exist_ok=True)
     os.makedirs(settings.CHROMA_PERSIST_DIR, exist_ok=True)
@@ -33,12 +46,15 @@ async def lifespan(app: FastAPI):
         if admin is None:
             admin = User(
                 username=settings.ADMIN_USERNAME,
-                password_hash=hash_password(settings.ADMIN_PASSWORD),
+                password_hash=hash_password(admin_pwd),
                 role="admin",
             )
             db.add(admin)
             await db.commit()
-            print(f"[启动] 管理员账号已创建: {settings.ADMIN_USERNAME} (密码已隐藏)")
+            # 首次创建管理员时显示密码（之后不再显示）
+            if not settings.ADMIN_PASSWORD:
+                settings.ADMIN_PASSWORD = admin_pwd
+            print(f"[启动] 管理员账号已创建: {settings.ADMIN_USERNAME} / {admin_pwd}（请妥善保管）")
         else:
             print(f"[启动] 管理员账号已存在: {settings.ADMIN_USERNAME}")
 

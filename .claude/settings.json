@@ -8,10 +8,23 @@
       "Bash(venv/Scripts/python -m pytest tests/test_knowledge.py -v --tb=short -q)",
       "Bash(rm -f \"d:\\\\LangChainRAG项目\\\\.claude\\\\test-result.json\" \"d:\\\\LangChainRAG项目\\\\.claude\\\\quality-result.json\")",
       "Bash(git add *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(cd \"d:\\\\LangChainRAG项目\" && git log --oneline -1 && rm -f \".claude/test-result.json\" \".claude/quality-result.json\")",
+      "Bash(git config *)",
+      "Bash(git remote *)",
+      "Bash(gh auth *)",
+      "Bash(git push *)",
+      "Bash(mkdir -p \"D:\\\\LangChainRAG项目\\\\.claude\")",
+      "Bash(echo '{\"passed\":true,\"total\":82,\"passedCount\":82,\"failedCount\":0,\"duration\":18.75,\"timestamp\":\"2026-07-29T12:27:30.000Z\"}')",
+      "Bash(venv/Scripts/python -m pytest tests/ -v --tb=short -q)",
+      "Bash(mkdir -p \"D:\\\\LangChainRAG项目\\\\backend\\\\.claude\")",
+      "Bash(cp \"d:\\\\LangChainRAG项目\\\\backend\\\\.claude\\\\quality-result.json\" \"d:\\\\LangChainRAG项目\\\\.claude\\\\quality-result.json\" && cat \"d:\\\\LangChainRAG项目\\\\.claude\\\\quality-result.json\")"
     ],
     "additionalDirectories": [
-      "d:\\LangChainRAG项目\\.claude"
+      "d:\\LangChainRAG项目\\.claude",
+      "D:\\LangChainRAG项目\\.claude",
+      "D:\\LangChainRAG项目\\backend",
+      "d:\\LangChainRAG项目\\backend\\.claude"
     ]
   },
   "hooks": {

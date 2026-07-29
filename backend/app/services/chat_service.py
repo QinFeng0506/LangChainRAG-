@@ -113,7 +113,10 @@ async def auto_generate_title(db: AsyncSession, session_id: str, first_question:
         title = title.strip().strip('"').strip("《》").strip()
         if len(title) > 20:
             title = title[:20]
-    except Exception:
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.warning("LLM 生成会话标题失败，使用问题截断作为标题: %s", str(e))
         title = first_question[:20]
 
     result = await db.execute(select(Session).where(Session.id == session_id))

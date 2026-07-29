@@ -8,12 +8,13 @@ class Settings(BaseSettings):
     # ===== 应用基础 =====
     APP_NAME: str = "LangChain RAG 知识库问答系统"
     APP_VERSION: str = "1.0.0"
-    DEBUG: bool = True
+    DEBUG: bool = False
     HOST: str = "0.0.0.0"
     PORT: int = 8000
 
     # ===== JWT 认证 =====
-    JWT_SECRET_KEY: str = "c7e8f9a0-b1c2-d3e4-f5a6-b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6"
+    # ⚠️ 生产环境必须通过 .env 设置强随机密钥，默认空值启动时会随机生成
+    JWT_SECRET_KEY: str = ""
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
@@ -60,7 +61,8 @@ class Settings(BaseSettings):
 
     # ===== 管理员预设 =====
     ADMIN_USERNAME: str = "admin"
-    ADMIN_PASSWORD: str = "12345678"
+    # ⚠️ 生产环境必须通过 .env 设置强密码，默认空值启动时会随机生成
+    ADMIN_PASSWORD: str = ""
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "allow"}
 
