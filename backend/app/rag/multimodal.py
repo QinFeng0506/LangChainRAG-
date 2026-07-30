@@ -1,5 +1,6 @@
 """多模态图片处理 —— 百炼 Qwen-VL 图片描述生成。"""
 import os
+import httpx
 from openai import AsyncOpenAI
 from app.config import get_settings
 
@@ -8,6 +9,10 @@ settings = get_settings()
 _vl_client = AsyncOpenAI(
     api_key=settings.DASHSCOPE_API_KEY,
     base_url=settings.DASHSCOPE_BASE_URL,
+    http_client=httpx.AsyncClient(
+        limits=httpx.Limits(max_keepalive_connections=20, max_connections=50),
+        timeout=httpx.Timeout(connect=10.0, read=90.0, write=30.0, pool=10.0),
+    ),
 )
 
 

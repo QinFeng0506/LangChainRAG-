@@ -43,10 +43,14 @@ def get_question_suggestions(n: int = 4) -> list[str]:
 
 
 def get_rate_limit(key: str, max_requests: int, window_seconds: int = 60) -> bool:
-    """简易令牌桶限流 —— 返回 True 表示允许请求。"""
+    """简易令牌桶限流 —— 原子递增避免高并发下的 check-then-act 竞态条件。
+
+    返回 True 表示允许请求，False 表示已达上限。
+    """
     cache_key_rl = f"rate_limit:{key}"
-    current = _cache.get(cache_key_rl, 0)
-    if current >= max_requests:
-        return False
-    _cache.set(cache_key_rl, current + 1, expire=window_seconds)
-    return True
+    # 原子递增（diskcache Cache.incr 内部加锁，线程安全）
+    current = _cache.incr(cache_key_rl, delta=1, default=0)
+    # 仅在首次创建时设置过期窗口（current==1 说明刚从 default=0 加到了 1）
+    if current == 1:
+        _cache.touch(cache_key_rl, expire=window_seconds)
+    return current <= max_requests

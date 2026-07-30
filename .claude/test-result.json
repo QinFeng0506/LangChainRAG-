@@ -1,8 +1,1 @@
-{
-  "passed": true,
-  "total": 82,
-  "passedCount": 82,
-  "failedCount": 0,
-  "duration": 18.47,
-  "timestamp": "2026-07-29T12:00:00.000Z"
-}
+{"passed": true, "total": 114, "passedCount": 114, "failedCount": 0, "duration": 22.0, "timestamp": "2026-07-30T18:22:00", "details": {"backend": {"total": 82, "passed": 82, "failed": 0}, "frontend": {"total": 32, "passed": 32, "failed": 0}}}

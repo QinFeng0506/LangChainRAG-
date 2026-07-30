@@ -102,22 +102,26 @@ async def auto_generate_title(db: AsyncSession, session_id: str, first_question:
     """根据首个问题自动生成会话标题。"""
     from app.rag.llm_client import chat_completion_sync
 
-    prompt = f"请将以下用户问题概括为10字以内的会话标题。直接返回标题，不要添加任何解释：\n\n{first_question}"
-
-    try:
-        title = await chat_completion_sync(
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.3,
-            max_tokens=20,
-        )
-        title = title.strip().strip('"').strip("《》").strip()
-        if len(title) > 20:
-            title = title[:20]
-    except Exception as e:
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.warning("LLM 生成会话标题失败，使用问题截断作为标题: %s", str(e))
+    # Mock 模式：直接用问题截断作为标题，跳过 LLM 调用
+    if settings.STRESS_TEST_MOCK:
         title = first_question[:20]
+    else:
+        prompt = f"请将以下用户问题概括为10字以内的会话标题。直接返回标题，不要添加任何解释：\n\n{first_question}"
+
+        try:
+            title = await chat_completion_sync(
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.3,
+                max_tokens=20,
+            )
+            title = title.strip().strip('"').strip("《》").strip()
+            if len(title) > 20:
+                title = title[:20]
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning("LLM 生成会话标题失败，使用问题截断作为标题: %s", str(e))
+            title = first_question[:20]
 
     result = await db.execute(select(Session).where(Session.id == session_id))
     session = result.scalar_one_or_none()

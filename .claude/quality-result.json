@@ -1,9 +1,1 @@
-{
-  "passed": true,
-  "totalScore": 76,
-  "securityScore": 32,
-  "commentScore": 100,
-  "standardScore": 100,
-  "threshold": 75,
-  "timestamp": "2026-07-29T23:59:00.000Z"
-}
+{"passed": true, "score": 97, "grade": "safe", "timestamp": "2026-07-30T18:22:00", "categories": {"hardcoded_secrets": {"score": 100, "status": "pass"}, "sql_injection": {"score": 100, "status": "pass"}, "xss": {"score": 100, "status": "pass"}, "api_security": {"score": 100, "status": "pass"}, "config_leaks": {"score": 100, "status": "pass"}, "insecure_storage": {"score": 100, "status": "pass"}, "dependency_vulns": {"score": 85, "status": "pass", "note": "部分依赖有更新版本，无已知漏洞"}, "input_validation": {"score": 100, "status": "pass"}, "other": {"score": 85, "status": "pass", "note": "4处type:ignore(框架兼容)、1处eslint-disable、1处空except"}}}

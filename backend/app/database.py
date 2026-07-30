@@ -9,7 +9,10 @@ settings = get_settings()
 engine = create_async_engine(
     settings.DATABASE_URL,
     echo=False,
-    connect_args={"check_same_thread": False},
+    connect_args={
+        "check_same_thread": False,
+        "timeout": 30,  # 并发写入冲突时等待30秒而非立即报 SQLITE_BUSY
+    },
 )
 
 # 异步会话工厂

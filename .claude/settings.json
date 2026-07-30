@@ -19,7 +19,18 @@
       "Bash(venv/Scripts/python -m pytest tests/ -v --tb=short -q)",
       "Bash(mkdir -p \"D:\\\\LangChainRAG项目\\\\backend\\\\.claude\")",
       "Bash(cp \"d:\\\\LangChainRAG项目\\\\backend\\\\.claude\\\\quality-result.json\" \"d:\\\\LangChainRAG项目\\\\.claude\\\\quality-result.json\" && cat \"d:\\\\LangChainRAG项目\\\\.claude\\\\quality-result.json\")",
-      "Bash(cd \"d:\\\\LangChainRAG项目\" && git log --oneline && rm -f \".claude/test-result.json\" \".claude/quality-result.json\" \"backend/.claude/quality-result.json\")"
+      "Bash(cd \"d:\\\\LangChainRAG项目\" && git log --oneline && rm -f \".claude/test-result.json\" \".claude/quality-result.json\" \"backend/.claude/quality-result.json\")",
+      "Bash(cd \"d:\\\\LangChainRAG项目\" && git log --oneline -3 && rm -f \".claude/test-result.json\" \".claude/quality-result.json\")",
+      "Bash(npx vitest *)",
+      "Bash(python -c \"import py_compile; py_compile.compile\\('tests/stress/locustfile.py', doraise=True\\); print\\('语法检查通过'\\)\")",
+      "Bash(python)",
+      "Bash(python -c \"import py_compile; py_compile.compile\\('tests/stress/locustfile.py', doraise=True\\); print\\('OK'\\)\")",
+      "Bash(python -c \"import py_compile; py_compile.compile\\('tests/stress/scripts/prepare_test_users.py', doraise=True\\); print\\('OK'\\)\")",
+      "Bash(python -c \"import py_compile; py_compile.compile\\('tests/stress/locustfile.py', doraise=True\\); print\\('语法OK'\\)\")",
+      "Bash(rm -f \"d:/LangChainRAG项目/.claude/test-result.json\" \"d:/LangChainRAG项目/.claude/quality-result.json\")",
+      "Bash(venv/Scripts/python -m pytest tests/ -v --tb=short)",
+      "Bash(echo \"---EXIT:$?\")",
+      "Bash(echo \"---DONE:$?\")"
     ],
     "additionalDirectories": [
       "d:\\LangChainRAG项目\\.claude",

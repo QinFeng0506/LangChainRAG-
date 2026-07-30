@@ -1,5 +1,6 @@
 """混合检索器 —— 语义向量 + BM25 关键词双路召回 + RRF 融合。"""
 import re
+import threading
 from math import log
 from collections import defaultdict
 from app.rag.embedding import embed_single
@@ -81,6 +82,7 @@ class BM25Scorer:
 # ===== 混合检索入口 =====
 _bm25_scorer: BM25Scorer | None = None
 _chunk_cache: list[dict] = []  # 缓存分块文本用于 BM25
+_lock = threading.RLock()  # 保护 _bm25_scorer / _chunk_cache 的并发读写
 
 
 def build_bm25_index(chunks: list[dict]):
@@ -88,20 +90,19 @@ def build_bm25_index(chunks: list[dict]):
     global _bm25_scorer, _chunk_cache
     if not chunks:
         return
-    _chunk_cache = chunks
-    texts = [c.get("text", "") for c in chunks]
-    _bm25_scorer = BM25Scorer()
-    _bm25_scorer.fit(texts)
+    with _lock:
+        _chunk_cache = chunks
+        texts = [c.get("text", "") for c in chunks]
+        _bm25_scorer = BM25Scorer()
+        _bm25_scorer.fit(texts)
 
 
-def _semantic_search(query: str, top_k: int = None) -> list[dict]:
-    """语义向量检索。"""
-    query_embedding = _sync_embed(query)  # 同步调用（在 asyncio loop 中执行）
-    k = top_k or settings.RETRIEVAL_TOP_K
+def _do_semantic_search(query_embedding: list[float], top_k: int) -> list[dict]:
+    """执行 ChromaDB 语义检索（同步，在 executors 线程中运行）。"""
     raw = search_similar(
         settings.CHROMA_COLLECTION_NAME,
         query_embedding,
-        top_k=k,
+        top_k=top_k,
     )
     results = []
     if raw.get("ids") and raw["ids"][0]:
@@ -119,22 +120,24 @@ def _keyword_search(query: str, top_k: int = None) -> list[dict]:
     """BM25 关键词检索。"""
     global _bm25_scorer, _chunk_cache
     k = top_k or settings.RETRIEVAL_TOP_K
-    if _bm25_scorer is None or not _chunk_cache:
-        return []
-
-    scores = []
-    for idx in range(len(_chunk_cache)):
-        s = _bm25_scorer.score(query, idx)
-        scores.append((idx, s))
+    with _lock:
+        if _bm25_scorer is None or not _chunk_cache:
+            return []
+        # 在锁内完成全部评分计算，防止并发修改 _chunk_cache
+        scores = []
+        for idx in range(len(_chunk_cache)):
+            s = _bm25_scorer.score(query, idx)
+            scores.append((idx, s))
+        cache_snapshot = list(_chunk_cache)
 
     scores.sort(key=lambda x: x[1], reverse=True)
     results = []
     for idx, score in scores[:k]:
         if score > 0:
             results.append({
-                "id": _chunk_cache[idx].get("id", f"bm25_{idx}"),
-                "text": _chunk_cache[idx].get("text", ""),
-                "metadata": _chunk_cache[idx].get("metadata", {}),
+                "id": cache_snapshot[idx].get("id", f"bm25_{idx}"),
+                "text": cache_snapshot[idx].get("text", ""),
+                "metadata": cache_snapshot[idx].get("metadata", {}),
                 "score": score,
             })
     return results
@@ -161,30 +164,25 @@ def _rrf_fusion(semantic_results: list[dict], keyword_results: list[dict], k: in
 
 
 async def hybrid_search(query: str, top_k: int = None) -> list[dict]:
-    """混合检索入口：语义 + BM25 → RRF 融合。"""
+    """混合检索入口：语义 + BM25 并行 → RRF 融合。
+
+    修复要点：
+    1. embedding 调用改为 async await（不再通过 _sync_embed 阻塞线程）
+    2. 语义检索和 BM25 关键词检索真正并行（asyncio.gather）
+    """
     import asyncio
     k = top_k or settings.RETRIEVAL_TOP_K
 
-    # 并行执行语义检索和关键词检索
+    # 先异步获取 embedding（I/O 操作，不阻塞事件循环）
+    query_embedding = await embed_single(query)
+
+    # 并行：语义检索（线程池跑 ChromaDB）+ BM25 关键词检索（线程池）
     loop = asyncio.get_running_loop()
-    semantic_results = await loop.run_in_executor(None, _semantic_search, query, k)
-    keyword_results = await loop.run_in_executor(None, _keyword_search, query, k)
+    semantic_results, keyword_results = await asyncio.gather(
+        loop.run_in_executor(None, _do_semantic_search, query_embedding, k),
+        loop.run_in_executor(None, _keyword_search, query, k),
+    )
 
     # RRF 融合
     fused = _rrf_fusion(semantic_results, keyword_results)
     return fused
-
-
-def _sync_embed(text: str) -> list[float]:
-    """同步向量化（线程池中调用）。"""
-    import asyncio
-    try:
-        loop = asyncio.get_running_loop()
-    except RuntimeError:
-        # 不在 asyncio 上下文中
-        import asyncio as aio
-        return aio.run(embed_single(text))
-
-    import concurrent.futures
-    future = asyncio.ensure_future(embed_single(text))
-    return future.result()  # type: ignore

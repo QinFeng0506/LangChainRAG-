@@ -59,6 +59,9 @@ class Settings(BaseSettings):
     # ===== 限流 =====
     RATE_LIMIT_PER_MINUTE: int = 20  # 单用户每分钟最多请求数
 
+    # ===== 压力测试 Mock 模式 =====
+    STRESS_TEST_MOCK: bool = False  # True 时跳过所有百炼 API 调用，使用模拟返回
+
     # ===== 管理员预设 =====
     ADMIN_USERNAME: str = "admin"
     # ⚠️ 生产环境必须通过 .env 设置强密码，默认空值启动时会随机生成
